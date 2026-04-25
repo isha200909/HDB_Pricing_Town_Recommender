@@ -251,8 +251,25 @@
     rangeEl.style.display    = 'none';
     townDescEl.style.display = 'none';
     townEl.style.display     = 'none';
+    dividerEl.style.display  = '';
 
     panel.style.borderColor = 'var(--accent)';
+
+    // Surface backend issues (for example, missing model artifacts) instead of
+    // showing an empty result panel with no explanation.
+    if (data && data.error) {
+      chipsEl.innerHTML = '';
+      reassuranceEl.textContent = data.error;
+      dividerEl.style.display = 'none';
+      ctaLabelEl.textContent = 'Please export/reload models, then try again.';
+      ctaBtn.textContent = 'Scout Again \u2192';
+      ctaBtn.onclick = () => { window.location.reload(); };
+      fadeInEl(reassuranceEl, 0);
+      fadeInEl(ctaLabelEl, 50);
+      fadeInEl(ctaBtn, 100);
+      showResult();
+      return;
+    }
 
     setTimeout(() => {
       chipsEl.innerHTML = '';
@@ -277,6 +294,9 @@
           }
           chipsEl.appendChild(chip);
         });
+        fadeInEl(chipsEl, 0);
+      } else {
+        chipsEl.innerHTML = '<span class="chip">No matching towns found</span>';
         fadeInEl(chipsEl, 0);
       }
     }, 300);

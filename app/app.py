@@ -1,7 +1,9 @@
 import json
 import datetime
 import warnings
+import traceback
 import numpy as np
+import pandas as pd
 from pathlib import Path
 
 from flask import Flask, render_template, request, jsonify
@@ -145,7 +147,7 @@ def _fwd_norm(val, col_min, col_max):
 @app.route("/predict", methods=["POST"])
 def predict():
     if not _reg_ready:
-        msg = "Model not loaded — run the export cell in Regression_Models_Comparison.ipynb first."
+        msg = "Model not loaded — run the export cell in 02A_Regression_Models.ipynb first."
         if request.headers.get("Accept") == "application/json":
             return jsonify({"price": "—", "price_raw": 0, "price_low": "—", "price_high": "—", "used_inputs": [], "price_note": msg})
         return render_template("index.html", active_tab="estimator", price="—", price_note=msg)
@@ -227,7 +229,9 @@ def predict():
             if "is_dbss" in row:
                 row["is_dbss"] = 1.0 if "DBSS" in flat_model.upper() else 0.0
 
-        features = np.array([[row[col] for col in _FEATURE_COLS]])
+        # Use a named DataFrame so LightGBM resolves feature names regardless
+        # of whether the model was originally trained on a DataFrame or array.
+        features = pd.DataFrame([row], columns=_FEATURE_COLS)
         prediction = _lgbm_reg.predict(features)[0]
 
         price_str      = f"${prediction:,.0f}"
@@ -250,6 +254,7 @@ def predict():
         if _any_liv: used_inputs.append(f"Liveability {liveability:.2f}")
 
     except Exception as e:
+        traceback.print_exc()   # print full stack trace to terminal for debugging
         price_str = price_low_str = price_high_str = "—"
         used_inputs = []
         note = f"Error: {e}"
@@ -278,7 +283,7 @@ def predict():
 @app.route("/recommend", methods=["POST"])
 def recommend():
     if not _clf_ready:
-        msg = "Model not loaded — run the export cell in recommender_kmeans.ipynb first."
+        msg = "Model not loaded — run the export cell in 02B_classification_model.ipynb first."
         if request.headers.get("Accept") == "application/json":
             return jsonify({"rec_cluster": "—", "rec_towns": [], "error": msg})
         return render_template("index.html", active_tab="recommender", recommendation=msg)
@@ -344,7 +349,8 @@ def recommend():
             "amenity_cluster_1km":      float(amenity_1km),
             "amenity_cluster_2km":      float(amenity_2km),
         }
-        features = np.array([[feature_map[col] for col in _CLF_FEATURE_COLS]])
+        # Use a named DataFrame to match the training environment precisely.
+        features = pd.DataFrame([feature_map], columns=_CLF_FEATURE_COLS)
 
         # ── 5. Scale → predict cluster + confidence ───────────────────────
         with warnings.catch_warnings():
@@ -375,12 +381,15 @@ def recommend():
             scored.append((town, dist))
 
         if scored:
-            raw        = np.array([s[1] for s in scored])
-            exp_scores = np.exp(-raw)                        # closer → higher
-            norm_scores = exp_scores / exp_scores.max()     # best town = 1.0
-            final      = [round(float(s) * cluster_confidence * 100)
-                          for s in norm_scores]
-            rec_towns  = [
+            raw         = np.array([s[1] for s in scored])
+            exp_scores  = np.exp(-raw)                       # closer → higher
+            norm_scores = exp_scores / exp_scores.max()      # best town = 1.0
+            # Score = similarity × confidence blend (confidence capped at 1 so
+            # low-confidence clusters never collapse all scores to 0).
+            confidence_weight = max(cluster_confidence, 0.20)
+            final       = [max(1, round(float(s) * confidence_weight * 100))
+                           for s in norm_scores]
+            rec_towns   = [
                 {"name": t, "score": sc}
                 for (t, _), sc in sorted(
                     zip(scored, final), key=lambda x: x[1], reverse=True
@@ -391,14 +400,19 @@ def recommend():
 
         result = f"Recommended cluster: {pred_cluster_name}"
     except Exception as e:
+        traceback.print_exc()   # print full stack trace to terminal for debugging
         result = f"Error: {e}"
 
     if request.headers.get("Accept") == "application/json":
-        return jsonify({
+        resp: dict = {
             "rec_cluster":    pred_cluster_name or "—",
             "rec_confidence": round(cluster_confidence * 100) if pred_cluster_name else 0,
             "rec_towns":      rec_towns,
-        })
+        }
+        # Surface backend errors to the JS error-display branch
+        if not pred_cluster_name and result.startswith("Error:"):
+            resp["error"] = result
+        return jsonify(resp)
     return render_template(
         "index.html",
         active_tab="recommender",
