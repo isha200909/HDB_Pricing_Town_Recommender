@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+{% block title %}Worth-O-Meter &middot; W.O.W.{% endblock %}
+
+{% block content %}
+  <!-- ── Two-column body ──────────────────────────────────── -->
+  <div class="page-body" id="main">
+
+    <!-- ── LEFT: Form column ──────────────────────────────── -->
+    <div class="form-col">
+
+      <!-- Price Estimator form -->
+      <!-- action/method retained for no-JS progressive enhancement; fetch intercepts when JS is available -->
+      <form class="card" id="estimatorForm" action="/predict" method="POST" novalidate>
+        <h2 class="card-title">Worth-O-Meter</h2>
+        <p class="card-hint">Fill in what you know &mdash; all fields are optional.</p>
+
+        <div class="form-grid">
+
+          <!-- Flat Type: pill selector -->
+          <div class="field field-full">
+            <span class="field-label">Flat Type</span>
+            <div class="pill-group" role="group" aria-label="Flat type">
+              <input type="radio" name="flat_type" id="ft_1r" value="1 ROOM" class="pill-radio">
+              <label for="ft_1r" class="pill-label">1 Room</label>
+              <input type="radio" name="flat_type" id="ft_2r" value="2 ROOM" class="pill-radio">
+              <label for="ft_2r" class="pill-label">2 Room</label>
+              <input type="radio" name="flat_type" id="ft_3r" value="3 ROOM" class="pill-radio">
+              <label for="ft_3r" class="pill-label">3 Room</label>
+              <input type="radio" name="flat_type" id="ft_4r" value="4 ROOM" class="pill-radio">
+              <label for="ft_4r" class="pill-label">4 Room</label>
+              <input type="radio" name="flat_type" id="ft_5r" value="5 ROOM" class="pill-radio">
+              <label for="ft_5r" class="pill-label">5 Room</label>
+              <input type="radio" name="flat_type" id="ft_ex" value="EXECUTIVE" class="pill-radio">
+              <label for="ft_ex" class="pill-label">Executive</label>
+              <input type="radio" name="flat_type" id="ft_mg" value="MULTI-GENERATION" class="pill-radio">
+              <label for="ft_mg" class="pill-label">Multi-Gen</label>
+            </div>
+          </div>
+
+          <!-- Flat Model (moved up to sit beside Floor Area) -->
+          <div class="field">
+            <label for="flat_model">Flat Model</label>
+            <select class="text-input" name="flat_model" id="flat_model" autocomplete="off">
+              <option value="">&#8212; select &#8212;</option>
+              <option value="2-room">2-room</option>
+              <option value="3Gen">3Gen</option>
+              <option value="Adjoined flat">Adjoined Flat</option>
+              <option value="Apartment">Apartment</option>
+              <option value="DBSS" title="Design, Build and Sell Scheme">DBSS</option>
+              <option value="Improved" title="Standard renovation scheme">Improved</option>
+              <option value="Improved-Maisonette">Improved-Maisonette</option>
+              <option value="Maisonette" title="Two-storey flat">Maisonette</option>
+              <option value="Model A">Model A</option>
+              <option value="Model A-Maisonette">Model A-Maisonette</option>
+              <option value="Model A2">Model A2</option>
+              <option value="Multi Generation">Multi Generation</option>
+              <option value="New Generation">New Generation</option>
+              <option value="Premium Apartment" title="Higher-spec fittings and finishes">Premium Apartment</option>
+              <option value="Premium Apartment Loft">Premium Apartment Loft</option>
+              <option value="Premium Maisonette">Premium Maisonette</option>
+              <option value="Simplified">Simplified</option>
+              <option value="Standard">Standard</option>
+              <option value="Terrace">Terrace</option>
+              <option value="Type S1">Type S1</option>
+              <option value="Type S2">Type S2</option>
+            </select>
+          </div>
+
+          <!-- Floor Area -->
+          <div class="field">
+            <label for="floor_area_sqm">
+              Floor Area
+              <span class="unit-toggle" aria-label="Unit">
+                <button type="button" id="unit_sqm" class="unit-btn active" aria-pressed="true">sqm</button>
+                <button type="button" id="unit_sqft" class="unit-btn" aria-pressed="false">sqft</button>
+              </span>
+            </label>
+            <select class="text-input" name="floor_area_sqm" id="floor_area_sqm" autocomplete="off">
+              <option value="">&#8212; select flat type first &#8212;</option>
+            </select>
+          </div>
+
+          <!-- Town: typeahead -->
+          <div class="field">
+            <label for="town_input">Town</label>
+            <div class="typeahead-wrap">
+              <input type="text" id="town_input" class="text-input"
+                placeholder="Search town..." autocomplete="off"
+                role="combobox" aria-autocomplete="list"
+                aria-controls="town_drop" aria-expanded="false" />
+              <input type="hidden" name="town" id="town_value" />
+              <input type="hidden" name="cbd_distance" id="cbd_distance_value" />
+              <div class="typeahead-drop" id="town_drop"
+                role="listbox" aria-label="Town suggestions"></div>
+            </div>
+          </div>
+
+          <!-- Storey range -->
+          <div class="field">
+            <label for="storey">Storey</label>
+            <select class="text-input" name="storey" id="storey" autocomplete="off">
+              <option value="">&#8212; select &#8212;</option>
+              <option value="2">01 &ndash; 03</option>
+              <option value="5">04 &ndash; 06</option>
+              <option value="8">07 &ndash; 09</option>
+              <option value="11">10 &ndash; 12</option>
+              <option value="14">13 &ndash; 15</option>
+              <option value="17">16 &ndash; 18</option>
+              <option value="20">19 &ndash; 21</option>
+              <option value="23">22 &ndash; 24</option>
+              <option value="26">25 &ndash; 27</option>
+              <option value="29">28 &ndash; 30</option>
+              <option value="32">31 &ndash; 33</option>
+              <option value="35">34 &ndash; 36</option>
+              <option value="38">37 &ndash; 39</option>
+              <option value="41">40 &ndash; 42</option>
+            </select>
+          </div>
+
+          <!-- Remaining Lease -->
+          <div class="field">
+            <label for="remaining_lease">Remaining Lease (years)</label>
+            <input class="text-input" type="number" name="remaining_lease" id="remaining_lease"
+              placeholder="e.g. 69" min="1" max="99" inputmode="numeric" autocomplete="off" />
+          </div>
+
+        </div><!-- /form-grid -->
+
+        <!-- More details toggle -->
+        <button type="button" class="details-toggle" id="detailsToggle"
+          aria-expanded="false" aria-controls="detailsContent">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          More details
+        </button>
+
+        <!-- Secondary inputs (collapsed) -->
+        <div class="details-content" id="detailsContent" aria-hidden="true">
+          <div class="form-grid">
+
+            <div class="liveability-header">
+              <span class="liveability-title">Liveability breakdown</span>
+              <span class="liveability-hint">Affects 15&ndash;25% of the composite score per pillar</span>
+            </div>
+
+            <div class="pillars-grid">
+
+              <!-- MRT (25%) -->
+              <div class="pillar-card">
+                <div class="pillar-card-hd">
+                  <span class="pillar-name">MRT Access</span>
+                  <span class="pillar-badge">25%</span>
+                </div>
+                <div class="pillar-slider">
+                  <input type="range" name="mrt_distance" id="liv_mrt_dist"
+                    min="0" max="2500" step="50" value="625" />
+                  <div class="pillar-slider-footer">
+                    <span class="pillar-slider-hint">0 m</span>
+                    <span class="pillar-slider-val" id="liv_mrt_val">625 m</span>
+                    <span class="pillar-slider-hint">2500 m</span>
+                  </div>
+                </div>
+                <div class="pillar-option">
+                  <span class="pillar-option-label">Interchange?</span>
+                  <div class="pillar-toggle">
+                    <label class="pillar-toggle-opt"><input type="radio" name="mrt_interchange" value="0" checked /><span>No</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="mrt_interchange" value="1" /><span>Yes</span></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Primary School (20%) -->
+              <div class="pillar-card">
+                <div class="pillar-card-hd">
+                  <span class="pillar-name">Primary School</span>
+                  <span class="pillar-badge">20%</span>
+                </div>
+                <div class="pillar-slider">
+                  <input type="range" name="pri_distance" id="liv_pri_dist"
+                    min="0" max="2000" step="50" value="361" />
+                  <div class="pillar-slider-footer">
+                    <span class="pillar-slider-hint">0 m</span>
+                    <span class="pillar-slider-val" id="liv_pri_val">361 m</span>
+                    <span class="pillar-slider-hint">2000 m</span>
+                  </div>
+                </div>
+                <div class="pillar-option">
+                  <span class="pillar-option-label">School type</span>
+                  <div class="pillar-toggle">
+                    <label class="pillar-toggle-opt"><input type="radio" name="pri_school_type" value="standard" checked /><span>Standard</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="pri_school_type" value="affiliated" /><span>Affiliated</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="pri_school_type" value="branded" /><span>Branded</span></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hawker (15%) -->
+              <div class="pillar-card">
+                <div class="pillar-card-hd">
+                  <span class="pillar-name">Hawker Centre</span>
+                  <span class="pillar-badge">15%</span>
+                </div>
+                <div class="pillar-slider">
+                  <input type="range" name="hawker_distance" id="liv_hawker_dist"
+                    min="0" max="3000" step="50" value="792" />
+                  <div class="pillar-slider-footer">
+                    <span class="pillar-slider-hint">0 m</span>
+                    <span class="pillar-slider-val" id="liv_hawker_val">792 m</span>
+                    <span class="pillar-slider-hint">3000 m</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Secondary School (20%) -->
+              <div class="pillar-card">
+                <div class="pillar-card-hd">
+                  <span class="pillar-name">Secondary School</span>
+                  <span class="pillar-badge">20%</span>
+                </div>
+                <div class="pillar-slider">
+                  <input type="range" name="sec_distance" id="liv_sec_dist"
+                    min="0" max="2000" step="50" value="459" />
+                  <div class="pillar-slider-footer">
+                    <span class="pillar-slider-hint">0 m</span>
+                    <span class="pillar-slider-val" id="liv_sec_val">459 m</span>
+                    <span class="pillar-slider-hint">2000 m</span>
+                  </div>
+                </div>
+                <div class="pillar-option">
+                  <span class="pillar-option-label">Competitive school?</span>
+                  <div class="pillar-toggle">
+                    <label class="pillar-toggle-opt"><input type="radio" name="sec_quality" value="0" checked /><span>No</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="sec_quality" value="1" /><span>Yes</span></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mall (20%) -->
+              <div class="pillar-card">
+                <div class="pillar-card-hd">
+                  <span class="pillar-name">Mall Access</span>
+                  <span class="pillar-badge">20%</span>
+                </div>
+                <div class="pillar-option" style="border-top: none; padding-top: 0;">
+                  <span class="pillar-option-label">Malls within 2 km</span>
+                  <div class="pillar-toggle">
+                    <label class="pillar-toggle-opt"><input type="radio" name="mall_within_2km" value="0" /><span>None</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="mall_within_2km" value="2" /><span>1–3</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="mall_within_2km" value="5" checked /><span>4–7</span></label>
+                    <label class="pillar-toggle-opt"><input type="radio" name="mall_within_2km" value="10" /><span>8+</span></label>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /pillars-grid -->
+          </div>
+        </div><!-- /details-content -->
+
+        <button type="submit" class="btn-primary" id="estimatorBtn">
+          <span class="btn-spinner" aria-hidden="true"></span>
+          <span class="btn-label">Estimate Worth &rarr;</span>
+        </button>
+
+      </form><!-- /estimatorForm -->
+
+    </div><!-- /form-col -->
+
+    <!-- ── RIGHT: Result column ────────────────────────────── -->
+    <div class="result-col">
+      <div class="result-panel" id="resultPanel" role="alert" aria-live="polite" aria-atomic="true">
+
+        <!-- Empty state -->
+        <div class="result-empty" id="resultEmpty">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <div class="result-empty-title">Your result will appear here</div>
+          <div class="result-empty-hint">Fill in the form above to get started</div>
+        </div>
+
+        <!-- Skeleton (shown during loading) -->
+        <div class="result-skeleton" id="resultSkeleton" aria-hidden="true">
+          <div class="skel skel-label"></div>
+          <div class="skel skel-price"></div>
+          <div class="skel skel-range"></div>
+          <div class="skel-chips">
+            <div class="skel skel-chip"></div>
+            <div class="skel skel-chip"></div>
+            <div class="skel skel-chip skel-chip--sm"></div>
+          </div>
+        </div>
+
+        <!-- Result content (hidden until fetch returns) -->
+        <div class="result-content" id="resultContent">
+          <div class="result-label" id="resultLabel">Estimated Resale Price</div>
+          <div class="result-price" id="resultPrice"></div>
+          <div class="result-town" id="resultTown" style="display:none"></div>
+          <div class="result-range" id="resultRange"></div>
+          <div class="result-town-desc" id="resultTownDesc" style="display:none"></div>
+          <div class="result-chips" id="resultChips"></div>
+          <div class="result-reassurance" id="resultReassurance">
+            Estimate based on real Singapore HDB resale data
+          </div>
+          <hr class="result-divider" id="resultDivider" />
+          <div class="result-cta-label" id="resultCtaLabel"></div>
+          <button type="button" class="result-cta-btn" id="resultCtaBtn"></button>
+        </div>
+
+      </div>
+    </div><!-- /result-col -->
+
+  </div><!-- /page-body -->
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  // ── Town typeahead with keyboard navigation ───────────────────
+  (function() {
+    const CBD_DIST = {
+      "CENTRAL AREA":    1.7, "BUKIT MERAH":     3.2, "KALLANG/WHAMPOA": 3.8,
+      "TOA PAYOH":       5.3, "GEYLANG":         5.8, "QUEENSTOWN":      5.9,
+      "MARINE PARADE":   7.2, "BISHAN":          7.3, "SERANGOON":       7.9,
+      "ANG MO KIO":      9.0, "CLEMENTI":        9.8, "BEDOK":           9.9,
+      "BUKIT TIMAH":    10.0, "HOUGANG":        10.2, "SENGKANG":       12.1,
+      "TAMPINES":       12.9, "BUKIT BATOK":    13.4, "JURONG EAST":    13.4,
+      "PUNGGOL":        13.9, "BUKIT PANJANG":  14.0, "PASIR RIS":      14.4,
+      "YISHUN":         15.4, "CHOA CHU KANG":  15.8, "JURONG WEST":    17.1,
+      "WOODLANDS":      17.8, "SEMBAWANG":      18.1,
+    };
+    const CBD_FALLBACK = 12.9;
+
+    const TOWNS = [
+      "ANG MO KIO","BEDOK","BISHAN","BUKIT BATOK","BUKIT MERAH","BUKIT PANJANG",
+      "BUKIT TIMAH","CENTRAL AREA","CHOA CHU KANG","CLEMENTI","GEYLANG","HOUGANG",
+      "JURONG EAST","JURONG WEST","KALLANG/WHAMPOA","MARINE PARADE","PASIR RIS",
+      "PUNGGOL","QUEENSTOWN","SEMBAWANG","SENGKANG","SERANGOON","TAMPINES",
+      "TOA PAYOH","WOODLANDS","YISHUN"
+    ];
+    const input  = document.getElementById('town_input');
+    const hidden = document.getElementById('town_value');
+    const cbdEl  = document.getElementById('cbd_distance_value');
+    const drop   = document.getElementById('town_drop');
+    let focusIdx = -1;
+
+    function getItems() { return drop.querySelectorAll('.drop-item'); }
+
+    function renderDrop(q) {
+      const matches = q ? TOWNS.filter(t => t.includes(q.toUpperCase())) : TOWNS;
+      drop.innerHTML = matches.map((t, i) =>
+        `<div class="drop-item" role="option" id="town-opt-${i}" data-val="${t}" aria-selected="false">${t}</div>`
+      ).join('');
+      drop.classList.toggle('open', matches.length > 0);
+      input.setAttribute('aria-expanded', matches.length > 0 ? 'true' : 'false');
+      focusIdx = -1;
+    }
+
+    function setFocus(idx) {
+      const items = getItems();
+      items.forEach((el, i) => {
+        el.classList.toggle('focused', i === idx);
+        el.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+      });
+      if (idx >= 0) input.setAttribute('aria-activedescendant', `town-opt-${idx}`);
+      else input.removeAttribute('aria-activedescendant');
+    }
+
+    function selectItem(val) {
+      input.value  = val;
+      hidden.value = val;
+      if (cbdEl) cbdEl.value = CBD_DIST[val] !== undefined ? CBD_DIST[val] : CBD_FALLBACK;
+      input.style.borderColor = 'var(--accent)';
+      drop.classList.remove('open');
+      input.setAttribute('aria-expanded', 'false');
+      focusIdx = -1;
+    }
+
+    input.addEventListener('focus', () => renderDrop(input.value));
+    input.addEventListener('input', () => { hidden.value = ''; if (cbdEl) cbdEl.value = ''; renderDrop(input.value); });
+
+    input.addEventListener('keydown', e => {
+      const items = getItems();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        focusIdx = Math.min(focusIdx + 1, items.length - 1);
+        setFocus(focusIdx);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusIdx = Math.max(focusIdx - 1, -1);
+        setFocus(focusIdx);
+      } else if (e.key === 'Enter' && focusIdx >= 0) {
+        e.preventDefault();
+        selectItem(items[focusIdx].dataset.val);
+      } else if (e.key === 'Escape') {
+        drop.classList.remove('open');
+        input.setAttribute('aria-expanded', 'false');
+        focusIdx = -1;
+      }
+    });
+
+    drop.addEventListener('click', e => {
+      const item = e.target.closest('.drop-item');
+      if (item) selectItem(item.dataset.val);
+    });
+
+    document.addEventListener('click', e => {
+      if (!input.contains(e.target) && !drop.contains(e.target)) {
+        drop.classList.remove('open');
+        input.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+
+  // ── Slider fill ───────────────────────────────────────────────
+  function updateSliderFill(slider) {
+    const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+    slider.style.background =
+      `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
+  }
+
+  function bindSlider(id, valId) {
+    const s = document.getElementById(id);
+    const d = document.getElementById(valId);
+    if (!s || !d) return;
+    updateSliderFill(s);
+    d.textContent = s.value + ' m';
+    s.addEventListener('input', () => {
+      updateSliderFill(s);
+      d.textContent = s.value + ' m';
+    });
+  }
+
+  // Liveability pillar distance sliders (display value in metres)
+  [
+    ['liv_mrt_dist',    'liv_mrt_val'],
+    ['liv_hawker_dist', 'liv_hawker_val'],
+    ['liv_sec_dist',    'liv_sec_val'],
+    ['liv_pri_dist',    'liv_pri_val'],
+  ].forEach(([id, valId]) => {
+    const s = document.getElementById(id);
+    const d = document.getElementById(valId);
+    if (!s || !d) return;
+    updateSliderFill(s);
+    d.textContent = parseInt(s.value) + ' m';
+    s.addEventListener('input', () => {
+      updateSliderFill(s);
+      d.textContent = parseInt(s.value) + ' m';
+    });
+  });
+
+  // ── More details toggle ───────────────────────────────────────
+  (function() {
+    const btn     = document.getElementById('detailsToggle');
+    const content = document.getElementById('detailsContent');
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !expanded);
+      content.setAttribute('aria-hidden', expanded);
+      content.classList.toggle('open', !expanded);
+      if (!expanded) {
+        ['liv_mrt_dist','liv_hawker_dist','liv_mall_dist','liv_sec_dist','liv_pri_dist'].forEach(id => {
+          const s = document.getElementById(id);
+          if (s) updateSliderFill(s);
+        });
+      }
+    });
+  })();
+
+  // ── Floor Area Dropdown (tied to flat type + sqm/sqft toggle) ──
+  (function () {
+    const SQM_BY_TYPE = {
+      '1 ROOM':           [{v:31},{v:33},{v:35,d:true}],
+      '2 ROOM':           [{v:38},{v:44},{v:47,d:true},{v:53}],
+      '3 ROOM':           [{v:60},{v:65},{v:67,d:true},{v:69},{v:73}],
+      '4 ROOM':           [{v:83},{v:90},{v:93,d:true},{v:96},{v:104}],
+      '5 ROOM':           [{v:110},{v:113,d:true},{v:121},{v:132}],
+      'EXECUTIVE':        [{v:133},{v:143,d:true},{v:155},{v:164}],
+      'MULTI-GENERATION': [{v:155},{v:167,d:true}],
+    };
+    const SQM_TO_SQFT = 10.7639;
+    let useSqft = false;
+
+    const sqmBtn  = document.getElementById('unit_sqm');
+    const sqftBtn = document.getElementById('unit_sqft');
+    const sel     = document.getElementById('floor_area_sqm');
+
+    function populateSqm(type) {
+      const rows = SQM_BY_TYPE[type] || [];
+      if (!rows.length) {
+        sel.innerHTML = '<option value="">&#8212; no data for this type &#8212;</option>';
+        return;
+      }
+      sel.innerHTML = rows.map(r => {
+        const displayVal = useSqft ? Math.round(r.v * SQM_TO_SQFT) : r.v;
+        const unit = useSqft ? ' sqft' : ' sqm';
+        return `<option value="${r.v}"${r.d ? ' selected' : ''}>${displayVal}${unit}</option>`;
+      }).join('');
+    }
+
+    sqmBtn.addEventListener('click', () => {
+      useSqft = false;
+      sqmBtn.classList.add('active');   sqmBtn.setAttribute('aria-pressed', 'true');
+      sqftBtn.classList.remove('active'); sqftBtn.setAttribute('aria-pressed', 'false');
+      const checked = document.querySelector('input[name="flat_type"]:checked');
+      if (checked) populateSqm(checked.value);
+    });
+
+    sqftBtn.addEventListener('click', () => {
+      useSqft = true;
+      sqftBtn.classList.add('active');  sqftBtn.setAttribute('aria-pressed', 'true');
+      sqmBtn.classList.remove('active'); sqmBtn.setAttribute('aria-pressed', 'false');
+      const checked = document.querySelector('input[name="flat_type"]:checked');
+      if (checked) populateSqm(checked.value);
+    });
+
+    document.querySelectorAll('input[name="flat_type"]').forEach(function (radio) {
+      radio.addEventListener('change', function () { populateSqm(this.value); });
+      if (radio.checked) populateSqm(radio.value);
+    });
+  })();
+
+  // ── Render estimator result ───────────────────────────────────
+  function renderEstimatorResult(data) {
+    const priceEl       = document.getElementById('resultPrice');
+    const townEl        = document.getElementById('resultTown');
+    const rangeEl       = document.getElementById('resultRange');
+    const townDescEl    = document.getElementById('resultTownDesc');
+    const chipsEl       = document.getElementById('resultChips');
+    const reassuranceEl = document.getElementById('resultReassurance');
+    const dividerEl     = document.getElementById('resultDivider');
+    const ctaLabelEl    = document.getElementById('resultCtaLabel');
+    const ctaBtn        = document.getElementById('resultCtaBtn');
+    const labelEl       = document.getElementById('resultLabel');
+
+    labelEl.textContent      = 'Estimated Resale Price';
+    priceEl.style.display    = '';
+    townEl.style.display     = 'none';
+    rangeEl.style.display    = '';
+    townDescEl.style.display = 'none';
+
+    panel.style.borderColor = 'var(--accent)';
+
+    setTimeout(() => countUp(priceEl, data.price_raw || 0), 100);
+
+    setTimeout(() => {
+      rangeEl.textContent = `Range: ${data.price_low} \u2013 ${data.price_high}`;
+      fadeInEl(rangeEl, 0);
+
+      chipsEl.innerHTML = '';
+      if (data.used_inputs && data.used_inputs.length > 0) {
+        data.used_inputs.forEach(inp => {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = inp;
+          chipsEl.appendChild(chip);
+        });
+      } else {
+        const muted = document.createElement('span');
+        muted.className = 'chip-muted';
+        muted.textContent = 'Using dataset medians \u2014 add inputs above for a personalised estimate.';
+        chipsEl.appendChild(muted);
+      }
+      fadeInEl(chipsEl, 0);
+    }, 400);
+
+    setTimeout(() => {
+      reassuranceEl.textContent = 'Estimate based on real Singapore HDB resale data';
+      fadeInEl(reassuranceEl, 0);
+    }, 600);
+
+    setTimeout(() => {
+      ctaLabelEl.textContent = 'Don\u2019t know which town to buy in?';
+      ctaBtn.textContent = 'Try What-Town-Next? \u2192';
+      ctaBtn.onclick = () => { window.location.href = '/recommender'; };
+      fadeInEl(dividerEl, 0);
+      fadeInEl(ctaLabelEl, 50);
+      fadeInEl(ctaBtn, 100);
+    }, 900);
+
+    showResult();
+  }
+
+  // ── Estimator form submit ─────────────────────────────────────
+  document.getElementById('estimatorForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('estimatorBtn');
+    setLoading(btn, true);
+    try {
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(this),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      renderEstimatorResult(data);
+    } catch (err) {
+      console.error(err);
+      panel.classList.add('has-result');
+      panel.classList.remove('is-loading');
+      document.getElementById('resultContent').style.display = '';
+      document.getElementById('resultLabel').textContent = 'Unable to get estimate';
+      document.getElementById('resultPrice').textContent = '\u2014';
+      document.getElementById('resultPrice').style.display = '';
+      document.getElementById('resultRange').textContent = 'Check your connection and try again.';
+      document.getElementById('resultRange').style.display = '';
+      document.getElementById('resultChips').innerHTML = '';
+      document.getElementById('resultReassurance').textContent = '';
+    } finally {
+      setLoading(btn, false);
+    }
+  });
+  </script>
+{% endblock %}

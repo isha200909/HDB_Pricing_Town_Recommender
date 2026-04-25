@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}W.O.W. &mdash; Worth-Or-What?{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=14" />
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ── Hero Bar ─────────────────────────────────────────── -->
+  <header class="hero" role="banner">
+    <div class="hero-brand">
+      <img src="{{ url_for('static', filename='wow-logo.png') }}" alt="W.O.W. – Worth-Or-What?" class="hero-logo" />
+    </div>
+    <div class="hero-centre">
+      <h1 class="hero-title">Worth-Or-What?</h1>
+      <p class="hero-subtitle">Your Singapore HDB Resale Adviser</p>
+      <p class="hero-trust">Built on 270,000+ real HDB resale transactions</p>
+      <nav class="hero-nav" aria-label="Tools">
+        <a href="/" class="hero-nav-link{% if active_page == 'estimator' %} active{% endif %}">
+          Worth-O-Meter
+        </a>
+        <a href="/recommender" class="hero-nav-link{% if active_page == 'recommender' %} active{% endif %}">
+          What-Town-Next?
+        </a>
+      </nav>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark mode">
+      <!-- Sun icon (shown in dark mode) -->
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+      <!-- Moon icon (shown in light mode) -->
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <footer class="footer">
+    &copy; 2026 W.O.W. &middot; Worth-Or-What? &middot; For informational purposes only
+  </footer>
+
+  <script>
+  // ── Theme toggle ──────────────────────────────────────────────
+  (function() {
+    const html   = document.documentElement;
+    const btn    = document.getElementById('themeToggle');
+    const sun    = btn.querySelector('.icon-sun');
+    const moon   = btn.querySelector('.icon-moon');
+    const saved  = localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    function applyTheme(t) {
+      html.setAttribute('data-theme', t);
+      sun.style.opacity  = t === 'dark' ? '1' : '0';
+      moon.style.opacity = t === 'dark' ? '0' : '1';
+      btn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    applyTheme(saved);
+
+    btn.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+  })();
+
+  // ── Shared result panel helpers ───────────────────────────────
+  const panel = document.getElementById('resultPanel');
+
+  function showResult() {
+    panel.classList.add('has-result');
+    panel.classList.remove('is-loading');
+    document.getElementById('resultContent').style.display = '';
+    if (window.innerWidth < 1024) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function fadeInEl(el, delayMs) {
+    if (reducedMotion) { el.style.opacity = '1'; return; }
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.classList.add('fade-in');
+      el.style.opacity = '';
+    }, delayMs);
+  }
+
+  function countUp(el, target) {
+    if (reducedMotion || target === 0) {
+      el.textContent = '$' + Math.round(target).toLocaleString();
+      return;
+    }
+    const dur = 300;
+    const t0  = performance.now();
+    function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = '$' + Math.round(target * e).toLocaleString();
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function setLoading(btn, loading) {
+    btn.disabled = loading;
+    btn.classList.toggle('loading', loading);
+    btn.querySelector('.btn-label').textContent = loading
+      ? (btn.id === 'estimatorBtn' ? 'Estimating\u2026' : 'Scouting\u2026')
+      : (btn.id === 'estimatorBtn' ? 'Re-estimate \u2192' : 'Scout Again \u2192');
+    if (loading) {
+      panel.classList.add('has-result', 'is-loading');
+      document.getElementById('resultContent').style.display = 'none';
+    } else {
+      panel.classList.remove('is-loading');
+    }
+  }
+  </script>
+
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+CLAUDE.md
+.superpowers/
+
+
+# Model artefacts — too large for GitHub (>100 MB limit)
+app/models/*.joblib
+app/models/*.pkl
+
+# Notebook backup files
+*.conflict_backup
+
+# Local dev runner
+run.bat
+
+# CatBoost training logs
+notebooks/catboost_info/
+
+# OS metadata
+.DS_Store
+*.DS_Store

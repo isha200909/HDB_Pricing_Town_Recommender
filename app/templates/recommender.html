@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% block title %}What-Town-Next? &middot; W.O.W.{% endblock %}
+
+{% block content %}
+  <!-- ── Two-column body ──────────────────────────────────── -->
+  <div class="page-body" id="main">
+
+    <!-- ── LEFT: Form column ──────────────────────────────── -->
+    <div class="form-col">
+
+      <!-- action/method retained for no-JS progressive enhancement -->
+      <form class="card" id="recommenderForm" action="/recommend" method="POST" novalidate>
+        <h2 class="card-title">What-Town-Next?</h2>
+
+        <div class="form-grid">
+
+          <!-- 1. Location → cbd_distance_km -->
+          <div class="field field-full">
+            <span class="field-label">Location</span>
+            <div class="pill-group" role="group" aria-label="Location region">
+              <input type="radio" name="cbd_distance_km" id="rec_loc_central" value="5" class="pill-radio" checked>
+              <label for="rec_loc_central" class="pill-label">Central</label>
+              <input type="radio" name="cbd_distance_km" id="rec_loc_east" value="14" class="pill-radio">
+              <label for="rec_loc_east" class="pill-label">East</label>
+              <input type="radio" name="cbd_distance_km" id="rec_loc_northeast" value="13" class="pill-radio">
+              <label for="rec_loc_northeast" class="pill-label">North-East</label>
+              <input type="radio" name="cbd_distance_km" id="rec_loc_west" value="15" class="pill-radio">
+              <label for="rec_loc_west" class="pill-label">West</label>
+              <input type="radio" name="cbd_distance_km" id="rec_loc_north" value="23" class="pill-radio">
+              <label for="rec_loc_north" class="pill-label">North</label>
+            </div>
+            <input type="hidden" name="planning_region" id="planning_region_value" value="Central">
+          </div>
+
+          <!-- 2. Budget → resale_price -->
+          <div class="field field-full">
+            <span class="field-label">Budget</span>
+            <div class="pill-group" role="group" aria-label="Budget">
+              <input type="radio" name="resale_price" id="rec_budget_400" value="350000" class="pill-radio">
+              <label for="rec_budget_400" class="pill-label">&le;$400k</label>
+              <input type="radio" name="resale_price" id="rec_budget_600" value="500000" class="pill-radio" checked>
+              <label for="rec_budget_600" class="pill-label">$400&ndash;600k</label>
+              <input type="radio" name="resale_price" id="rec_budget_800" value="700000" class="pill-radio">
+              <label for="rec_budget_800" class="pill-label">$600&ndash;800k</label>
+              <input type="radio" name="resale_price" id="rec_budget_800p" value="950000" class="pill-radio">
+              <label for="rec_budget_800p" class="pill-label">$800k+</label>
+            </div>
+          </div>
+
+          <!-- 3. Flat size → floor_area_sqm -->
+          <div class="field field-full">
+            <span class="field-label">Flat Size</span>
+            <div class="pill-group" role="group" aria-label="Flat size">
+              <input type="radio" name="floor_area_sqm" id="rec_size_2r" value="45" class="pill-radio">
+              <label for="rec_size_2r" class="pill-label">2-Room</label>
+              <input type="radio" name="floor_area_sqm" id="rec_size_3r" value="68" class="pill-radio">
+              <label for="rec_size_3r" class="pill-label">3-Room</label>
+              <input type="radio" name="floor_area_sqm" id="rec_size_4r" value="93" class="pill-radio" checked>
+              <label for="rec_size_4r" class="pill-label">4-Room</label>
+              <input type="radio" name="floor_area_sqm" id="rec_size_5r" value="113" class="pill-radio">
+              <label for="rec_size_5r" class="pill-label">5-Room</label>
+              <input type="radio" name="floor_area_sqm" id="rec_size_ex" value="143" class="pill-radio">
+              <label for="rec_size_ex" class="pill-label">Executive</label>
+            </div>
+          </div>
+
+          <!-- 4. Amenities → near_hawker, near_mrt, near_mall, near_school -->
+          <div class="field field-full">
+            <span class="field-label">Amenities</span>
+            <div class="pillar-toggle" role="group" aria-label="Nearby amenities">
+              <label class="pillar-toggle-opt">
+                <input type="checkbox" name="near_hawker" value="1">
+                <span>Hawker</span>
+              </label>
+              <label class="pillar-toggle-opt">
+                <input type="checkbox" name="near_mrt" value="1">
+                <span>MRT</span>
+              </label>
+              <label class="pillar-toggle-opt">
+                <input type="checkbox" name="near_mall" value="1">
+                <span>Mall</span>
+              </label>
+              <label class="pillar-toggle-opt">
+                <input type="checkbox" name="near_school" value="1">
+                <span>School</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- More preferences toggle -->
+        <button type="button" class="details-toggle" id="recDetailsToggle"
+          aria-expanded="false" aria-controls="recDetailsContent">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          More preferences
+        </button>
+
+        <div class="details-content" id="recDetailsContent" aria-hidden="true">
+          <div class="form-grid">
+
+            <!-- 5. Estate age → hdb_age -->
+            <div class="field field-full">
+              <span class="field-label">Estate Age</span>
+              <div class="pill-group" role="group" aria-label="Estate age">
+                <input type="radio" name="hdb_age" id="rec_age_new" value="5" class="pill-radio">
+                <label for="rec_age_new" class="pill-label">New <span class="pill-sub">&lt;10 yrs</span></label>
+                <input type="radio" name="hdb_age" id="rec_age_recent" value="20" class="pill-radio" checked>
+                <label for="rec_age_recent" class="pill-label">Recent <span class="pill-sub">10&ndash;30 yrs</span></label>
+                <input type="radio" name="hdb_age" id="rec_age_estab" value="35" class="pill-radio">
+                <label for="rec_age_estab" class="pill-label">Established <span class="pill-sub">30&ndash;45 yrs</span></label>
+                <input type="radio" name="hdb_age" id="rec_age_heritage" value="50" class="pill-radio">
+                <label for="rec_age_heritage" class="pill-label">Heritage <span class="pill-sub">45+ yrs</span></label>
+              </div>
+            </div>
+
+            <!-- 6. Floor preference → storey_ratio -->
+            <div class="field field-full">
+              <span class="field-label">Floor Preference</span>
+              <div class="pill-group" role="group" aria-label="Floor preference">
+                <input type="radio" name="storey_ratio" id="rec_fl_low" value="0.25" class="pill-radio">
+                <label for="rec_fl_low" class="pill-label">Low</label>
+                <input type="radio" name="storey_ratio" id="rec_fl_mid" value="0.5" class="pill-radio" checked>
+                <label for="rec_fl_mid" class="pill-label">Mid</label>
+                <input type="radio" name="storey_ratio" id="rec_fl_high" value="0.75" class="pill-radio">
+                <label for="rec_fl_high" class="pill-label">High</label>
+              </div>
+            </div>
+
+            <!-- 7. Building height → max_floor_lvl (used with hdb_age to compute estate_height_modernity) -->
+            <div class="field field-full">
+              <span class="field-label">Building Height</span>
+              <div class="pill-group" role="group" aria-label="Building height">
+                <input type="radio" name="max_floor_lvl" id="rec_ht_low" value="8" class="pill-radio">
+                <label for="rec_ht_low" class="pill-label">Low-rise <span class="pill-sub">&le;10 floors</span></label>
+                <input type="radio" name="max_floor_lvl" id="rec_ht_mid" value="15" class="pill-radio" checked>
+                <label for="rec_ht_mid" class="pill-label">Mid-rise <span class="pill-sub">10&ndash;20 floors</span></label>
+                <input type="radio" name="max_floor_lvl" id="rec_ht_high" value="25" class="pill-radio">
+                <label for="rec_ht_high" class="pill-label">High-rise <span class="pill-sub">20+ floors</span></label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="recommenderBtn">
+          <span class="btn-spinner" aria-hidden="true"></span>
+          <span class="btn-label">Find My Town &rarr;</span>
+        </button>
+
+      </form>
+
+    </div><!-- /form-col -->
+
+    <!-- ── RIGHT: Result column ────────────────────────────── -->
+    <div class="result-col">
+      <div class="result-panel" id="resultPanel" role="alert" aria-live="polite" aria-atomic="true">
+
+        <!-- Empty state -->
+        <div class="result-empty" id="resultEmpty">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <div class="result-empty-title">Your result will appear here</div>
+          <div class="result-empty-hint">Fill in the form above to get started</div>
+        </div>
+
+        <!-- Skeleton (shown during loading) -->
+        <div class="result-skeleton" id="resultSkeleton" aria-hidden="true">
+          <div class="skel skel-label"></div>
+          <div class="skel skel-price"></div>
+          <div class="skel skel-range"></div>
+          <div class="skel-chips">
+            <div class="skel skel-chip"></div>
+            <div class="skel skel-chip"></div>
+            <div class="skel skel-chip skel-chip--sm"></div>
+          </div>
+        </div>
+
+        <!-- Result content (hidden until fetch returns) -->
+        <div class="result-content" id="resultContent">
+          <div class="result-label" id="resultLabel">Your Best-Match Towns</div>
+          <div class="result-price" id="resultPrice" style="display:none"></div>
+          <div class="result-town" id="resultTown" style="display:none"></div>
+          <div class="result-range" id="resultRange" style="display:none"></div>
+          <div class="result-town-desc" id="resultTownDesc" style="display:none"></div>
+          <div class="result-chips" id="resultChips"></div>
+          <div class="result-reassurance" id="resultReassurance"></div>
+          <hr class="result-divider" id="resultDivider" />
+          <div class="result-cta-label" id="resultCtaLabel"></div>
+          <button type="button" class="result-cta-btn" id="resultCtaBtn"></button>
+        </div>
+
+      </div>
+    </div><!-- /result-col -->
+
+  </div><!-- /page-body -->
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  // ── Recommender "More preferences" toggle ─────────────────────
+  (function() {
+    const btn     = document.getElementById('recDetailsToggle');
+    const content = document.getElementById('recDetailsContent');
+    if (!btn || !content) return;
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !open);
+      content.setAttribute('aria-hidden', open);
+      content.classList.toggle('open', !open);
+    });
+  })();
+
+  // ── Sync planning_region hidden input with selected location pill ────────
+  document.querySelectorAll('input[name="cbd_distance_km"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      const map = {
+        'rec_loc_central':   'Central',
+        'rec_loc_east':      'East',
+        'rec_loc_northeast': 'North-East',
+        'rec_loc_west':      'West',
+        'rec_loc_north':     'North'
+      };
+      document.getElementById('planning_region_value').value = map[this.id] || 'Central';
+    });
+  });
+
+  // ── Render recommender result ─────────────────────────────────
+  function renderRecommenderResult(data) {
+    const priceEl       = document.getElementById('resultPrice');
+    const townEl        = document.getElementById('resultTown');
+    const rangeEl       = document.getElementById('resultRange');
+    const townDescEl    = document.getElementById('resultTownDesc');
+    const chipsEl       = document.getElementById('resultChips');
+    const reassuranceEl = document.getElementById('resultReassurance');
+    const dividerEl     = document.getElementById('resultDivider');
+    const ctaLabelEl    = document.getElementById('resultCtaLabel');
+    const ctaBtn        = document.getElementById('resultCtaBtn');
+    const labelEl       = document.getElementById('resultLabel');
+
+    labelEl.textContent      = 'Your W.O.W. Factor Towns';
+    priceEl.style.display    = 'none';
+    rangeEl.style.display    = 'none';
+    townDescEl.style.display = 'none';
+    townEl.style.display     = 'none';
+
+    panel.style.borderColor = 'var(--accent)';
+
+    setTimeout(() => {
+      chipsEl.innerHTML = '';
+      if (data.rec_towns && data.rec_towns.length) {
+        const wowLabel = document.createElement('div');
+        wowLabel.className = 'result-wow-label';
+        wowLabel.textContent = 'W.O.W. Factor';
+        chipsEl.appendChild(wowLabel);
+        const toTitle = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        data.rec_towns.forEach((item, idx) => {
+          const name  = typeof item === 'string' ? item : item.name;
+          const score = (typeof item === 'object' && item.score != null) ? item.score : null;
+          const chip  = document.createElement('span');
+          chip.className = idx === 0 ? 'chip chip--primary' : 'chip';
+          if (idx > 0) chip.style.fontSize = Math.max(0.72, 0.88 - (idx - 1) * 0.05) + 'em';
+          chip.textContent = toTitle(name);
+          if (score !== null) {
+            const badge = document.createElement('span');
+            badge.className   = 'chip-score';
+            badge.textContent = score + '%';
+            chip.appendChild(badge);
+          }
+          chipsEl.appendChild(chip);
+        });
+        fadeInEl(chipsEl, 0);
+      }
+    }, 300);
+
+    setTimeout(() => {
+      reassuranceEl.textContent = 'Matched from 270,000+ real HDB resale transactions';
+      fadeInEl(reassuranceEl, 0);
+    }, 500);
+
+    setTimeout(() => {
+      ctaLabelEl.textContent = 'Want to check the price?';
+      ctaBtn.textContent     = 'Try Worth-O-Meter \u2192';
+      ctaBtn.onclick = () => { window.location.href = '/'; };
+      fadeInEl(dividerEl, 0);
+      fadeInEl(ctaLabelEl, 50);
+      fadeInEl(ctaBtn, 100);
+    }, 700);
+
+    showResult();
+  }
+
+  // ── Recommender form submit ───────────────────────────────────
+  document.getElementById('recommenderForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('recommenderBtn');
+    setLoading(btn, true);
+    try {
+      const res = await fetch('/recommend', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(this),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      renderRecommenderResult(data);
+    } catch (err) {
+      console.error(err);
+      panel.classList.add('has-result');
+      panel.classList.remove('is-loading');
+      document.getElementById('resultContent').style.display = '';
+      document.getElementById('resultLabel').textContent = 'Unable to get recommendation';
+      document.getElementById('resultTown').style.display = 'none';
+      document.getElementById('resultRange').textContent = 'Check your connection and try again.';
+      document.getElementById('resultRange').style.display = '';
+      document.getElementById('resultChips').innerHTML = '';
+      document.getElementById('resultReassurance').textContent = '';
+    } finally {
+      setLoading(btn, false);
+    }
+  });
+  </script>
+{% endblock %}

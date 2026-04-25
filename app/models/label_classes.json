@@ -1,0 +1,34 @@
+{
+  "flat_type": [
+    "1 ROOM",
+    "2 ROOM",
+    "3 ROOM",
+    "4 ROOM",
+    "5 ROOM",
+    "EXECUTIVE",
+    "MULTI-GENERATION"
+  ],
+  "flat_model": [
+    "2-room",
+    "3Gen",
+    "Adjoined flat",
+    "Apartment",
+    "DBSS",
+    "Improved",
+    "Improved-Maisonette",
+    "Maisonette",
+    "Model A",
+    "Model A-Maisonette",
+    "Model A2",
+    "Multi Generation",
+    "New Generation",
+    "Premium Apartment",
+    "Premium Apartment Loft",
+    "Premium Maisonette",
+    "Simplified",
+    "Standard",
+    "Terrace",
+    "Type S1",
+    "Type S2"
+  ]
+}
