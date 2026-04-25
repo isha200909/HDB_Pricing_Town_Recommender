@@ -2,9 +2,8 @@ CLAUDE.md
 .superpowers/
 
 
-# Model artefacts — too large for GitHub (>100 MB limit)
-app/models/*.joblib
-app/models/*.pkl
+# Raw dataset — too large for GitHub (165 MB)
+data.csv
 
 # Notebook backup files
 *.conflict_backup
