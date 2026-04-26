@@ -31,7 +31,7 @@ We built **W.O.W. (Worth-Or-What?)**, an end-to-end data product that combines e
 |------|-----------|------------------|
 | **Product Manager** | Lucas | Designed and developed the web application; overall project coordination |
 | **EDA Team** | Claire, Ganesh, Stan | Exploratory data analysis — uncovering key insights from the dataset |
-| **Modelling Team** | Nureisya, Din, Manyu | Machine learning — training, evaluating, and selecting the best models for price prediction and town recommendation |
+| **Modelling Team** | Nuriesya, Din, Manyu | Machine learning — training, evaluating, and selecting the best models for price prediction and town recommendation |
 
 ---
 
