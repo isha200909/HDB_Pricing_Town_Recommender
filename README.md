@@ -116,11 +116,9 @@ The app requires trained model files. Run the notebooks in order:
 
 ### 3. Start the app
 
-```bash
-python app/app.py
-```
+Open https://hdb-predictor-recommender-qiej.onrender.com/recommender
 
-Then open [http://127.0.0.1:5000](http://127.0.0.1:5000)
+Note: It will take a few minutes to load
 
 ---
 
